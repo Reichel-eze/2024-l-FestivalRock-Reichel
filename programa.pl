@@ -80,7 +80,7 @@ cantidadDeEntradasVendidas(Festival, Cantidad) :-
     findall(Entrada, entradaVendida(Festival, Entrada), Entradas),
     length(Entradas, Cantidad).
     
-% 5)recaudaciónTotal/2: Relaciona un festival con el total recaudado con la venta de entradas. 
+% 5) recaudaciónTotal/2: Relaciona un festival con el total recaudado con la venta de entradas. 
 % Cada tipo de entrada se vende a un precio diferente:
 %  - El precio del campo es el precio base del lugar donde se realiza el festival.
 %  - La platea general es el precio base del lugar más el plus que se p aplica a la zona. 
@@ -93,7 +93,9 @@ recaudacionTotal(Festival, TotalRecaudado) :-
     findall(Precio, (entradaVendida(Festival,Entrada), precioEntrada(Entrada, Lugar, Precio)), Precios),
     sum_list(Precios, TotalRecaudado).
 
-precioEntrada(campo, Lugar, Precio) :- lugar(Lugar, _, Precio). 
+% USO DE POLIMORFISMO PARA EL precioEntrada
+
+precioEntrada(campo, Lugar, PrecioBase) :- lugar(Lugar, _, PrecioBase). 
 
 precioEntrada(plateaGeneral(Zona), Lugar, Precio) :-
     lugar(Lugar, _, PrecioBase),
@@ -101,14 +103,49 @@ precioEntrada(plateaGeneral(Zona), Lugar, Precio) :-
     Precio is PrecioBase + PrecioZona.
 
 precioEntrada(plateaNumerada(Fila), Lugar, PrecioFila) :- 
-    precioSegunFila(Fila, Lugar, PrecioFila).
-    
-precioSegunFila(Fila, Lugar, PrecioFila) :- 
-    lugar(Lugar,_,PrecioBase),
-    Fila > 10, 
+    Fila > 10,
+    lugar(Lugar, _, PrecioBase),
     PrecioFila is 3 * PrecioBase.
 
-precioSegunFila(Fila, Lugar, PrecioFila) :- 
-    lugar(Lugar,_,PrecioBase),
-    Fila =< 10, 
+precioEntrada(plateaNumerada(Fila), Lugar, PrecioFila) :- 
+    Fila =< 10,
+    lugar(Lugar, _, PrecioBase),
     PrecioFila is 6 * PrecioBase.
+    
+%precioSegunFila(Fila, Lugar, PrecioFila).    
+%precioSegunFila(Fila, Lugar, PrecioFila) :- 
+%    lugar(Lugar,_,PrecioBase),
+%    Fila > 10, 
+%    PrecioFila is 3 * PrecioBase.
+
+%precioSegunFila(Fila, Lugar, PrecioFila) :- 
+%    lugar(Lugar,_,PrecioBase),
+%    Fila =< 10, 
+%    PrecioFila is 6 * PrecioBase.ma
+
+% 6) delMismoPalo/2: Relaciona dos bandas si tocaron juntas en algún recital o si una de ellas tocó con una banda del mismo palo 
+% que la otra, pero más popular.   
+
+% RECURSIVIDAD!!!
+
+delMismoPalo(UnaBanda, OtraBanda) :- tocoCon(UnaBanda, OtraBanda).  % CASO BASE (tocar con una banda)
+
+delMismoPalo(UnaBanda, OtraBanda) :-                                % CASO RECURSIVO (tocar con una banda tercera)
+    tocoCon(UnaBanda, TercerBanda),                                 % "una de las bandas, toco con una tercer banda"                   
+    esMasPopularQue(TercerBanda, OtraBanda),                        % "esta tercer banda, es mas popular que otra banda"
+    delMismoPalo(TercerBanda, OtraBanda).                           % "la tercer banda y la otra banda son del mismo palo"
+
+tocoCon(UnaBanda, OtraBanda) :-
+    festival(_, Bandas, _),     % algun festival con Bandas
+    member(UnaBanda, Bandas),
+    member(OtraBanda, Bandas),
+    UnaBanda \= OtraBanda.
+
+esMasPopularQue(TercerBanda, OtraBanda) :-
+    banda(TercerBanda, _, PopularidadTercerBanda),
+    banda(OtraBanda, _, PopularidadOtraBanda),
+    PopularidadTercerBanda > PopularidadOtraBanda.
+
+
+
+
