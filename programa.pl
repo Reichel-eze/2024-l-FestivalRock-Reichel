@@ -102,15 +102,23 @@ precioEntrada(plateaGeneral(Zona), Lugar, Precio) :-
     plusZona(Lugar, Zona, PrecioZona),
     Precio is PrecioBase + PrecioZona.
 
-precioEntrada(plateaNumerada(Fila), Lugar, PrecioFila) :- 
-    Fila > 10,
-    lugar(Lugar, _, PrecioBase),
-    PrecioFila is 3 * PrecioBase.
+%precioEntrada(plateaNumerada(Fila), Lugar, PrecioFila) :- 
+%    Fila > 10,
+%    lugar(Lugar, _, PrecioBase),
+%    PrecioFila is 3 * PrecioBase.
 
-precioEntrada(plateaNumerada(Fila), Lugar, PrecioFila) :- 
-    Fila =< 10,
+%precioEntrada(plateaNumerada(Fila), Lugar, PrecioFila) :- 
+%    Fila =< 10,
+%    lugar(Lugar, _, PrecioBase),
+%    PrecioFila is 6 * PrecioBase.
+
+precioEntrada(plateaNumerada(Fila), Lugar, PrecioFila) :-
+    multiplicadorSegunFila(Fila, Multiplicador),
     lugar(Lugar, _, PrecioBase),
-    PrecioFila is 6 * PrecioBase.
+    PrecioFila is Multiplicador * PrecioBase.
+
+multiplicadorSegunFila(Fila, 3) :- Fila > 10.
+multiplicadorSegunFila(Fila, 6) :- Fila =< 10.
     
 %precioSegunFila(Fila, Lugar, PrecioFila).    
 %precioSegunFila(Fila, Lugar, PrecioFila) :- 
